@@ -47,11 +47,11 @@ npx skills add evaboot-labs/ai-sdr-project
 
 **2. Every lead is checked, field by field.** Evaboot's own filter check, placeholder companies, HQ, company size and industry. Each dropped lead gets its reason.
 
-<img src=".github/assets/screenshots/2-qualify.png" alt="Claude summary: 10 leads exported, 2 kept, 8 dropped with a reason each" width="800">
+<img src=".github/assets/screenshots/2-qualify.png" alt="Claude summary: 10 leads exported, 2 kept, 8 dropped, with the count per reason" width="800">
 
 **3. A prospect sheet you can act on.** Fit score, the reason, the channel, a connection note and an opening line per lead, as a table and a CSV. Nothing is sent.
 
-<img src=".github/assets/screenshots/3-sheet.png" alt="Prospect sheet with fit score, reason, connection note and opening line per lead" width="800">
+<img src=".github/assets/screenshots/3-sheet.png" alt="Prospect sheet CSV with fit score, connection note and opening line per lead, names removed" width="800">
 
 ## What you need
 

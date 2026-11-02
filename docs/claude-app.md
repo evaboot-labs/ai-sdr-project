@@ -10,13 +10,13 @@ The AI SDR runs in a Claude Project on claude.ai or the Claude desktop app. No t
 
 1. Download this repo (*Code > Download ZIP*) and unzip it.
 2. Zip the `skills/ai-sdr-project` folder on its own (`ai-sdr-project.zip`, with `SKILL.md` inside the `ai-sdr-project` folder).
-3. *Customize > Skills > Upload a skill*, pick the zip, and turn the skill on.
+3. *Customize > Skills > Add > Upload skill*, pick the zip and click **Upload**. The skill is on once uploaded.
 
 ## 3. Create the project
 
 1. *Projects > New project*, name it `AI SDR`.
-2. **Instructions**: paste the text from [project/instructions.md](../project/instructions.md).
-3. **Files**: add `ICP.md` and `OFFER.md` from the repo. Fill them in first, or let Claude ask you the questions in the first chat.
+2. **Instructions** (*Edit*): paste the text from [project/instructions.md](../project/instructions.md).
+3. **Context** (*Add*): upload `ICP.md` and `OFFER.md` from the repo. Fill them in first, or let Claude ask you the questions in the first chat.
 
 ## 4. Run a session
 
