@@ -1,0 +1,14 @@
+{
+  "name": "evaboot-labs-claude-ai-sdr",
+  "owner": { "name": "Evaboot", "url": "https://evaboot.com" },
+  "metadata": {
+    "description": "Claude as your SDR for one session: a Sales Navigator search from a sentence, qualified leads with verified emails, and a first touch per lead."
+  },
+  "plugins": [
+    {
+      "name": "claude-ai-sdr",
+      "source": "./",
+      "description": "Build a Sales Navigator search from a sentence, export a small batch with Evaboot, qualify every lead against your ICP and write one LinkedIn connection note and one email opening line per qualified lead."
+    }
+  ]
+}

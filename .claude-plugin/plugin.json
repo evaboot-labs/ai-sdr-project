@@ -1,0 +1,13 @@
+{
+  "name": "claude-ai-sdr",
+  "version": "1.0.0",
+  "description": "Build a Sales Navigator search from a sentence, export a small batch with Evaboot, qualify every lead against your ICP and write one LinkedIn connection note and one email opening line per qualified lead.",
+  "author": { "name": "Evaboot", "url": "https://evaboot.com" },
+  "homepage": "https://evaboot.com/blog/SLUG",
+  "repository": "https://github.com/evaboot-labs/claude-ai-sdr",
+  "license": "MIT",
+  "privacyPolicyUrl": "https://evaboot.com/privacy-policy",
+  "keywords": ["ai-sdr", "claude", "claude-project", "sales-navigator", "prospecting", "evaboot", "mcp", "linkedin"],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json"
+}
