@@ -1,0 +1,546 @@
+{
+  "name": "AI SDR session (Evaboot + Claude)",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "AI SDR session",
+        "formDescription": "Paste a Sales Navigator search URL. Evaboot exports the leads (1 credit each), Claude qualifies them and writes the first touch. Nothing is sent.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Sales Navigator search URL",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "How many leads",
+              "fieldType": "number",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "577aad6c-3e4c-4b13-9edf-fd6e7e614336",
+      "name": "Prospecting session",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "f12c4166-2f69-48ca-b711-2a63a5f8651b"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1993cfa6-2ae3-4664-9d23-fe3565e5317b",
+              "name": "icp",
+              "type": "string",
+              "value": "PASTE YOUR ICP.md"
+            },
+            {
+              "id": "49c11235-bd57-44b8-b6a9-34d45d6c3c97",
+              "name": "offer",
+              "type": "string",
+              "value": "PASTE YOUR OFFER.md"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "46676ad0-b3b2-4a04-b324-7484590d37a5",
+      "name": "Your settings",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://mcp.evaboot.com/mcp",
+        "authentication": "bearerAuth",
+        "tool": {
+          "__rl": true,
+          "mode": "list",
+          "value": "export_sn_search_or_list",
+          "cachedResultName": "export_sn_search_or_list"
+        },
+        "inputMode": "json",
+        "jsonInput": "={{ JSON.stringify({ search_url: $('Prospecting session').first().json['Sales Navigator search URL'], name: 'AI SDR session ' + $now.toFormat('yyyy-MM-dd HH:mm'), max_results: Math.min(Number($('Prospecting session').first().json['How many leads']) || 10, 100) }) }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "bfbb543c-dde3-4606-b4b8-03d17765f90f",
+      "name": "Start the export",
+      "type": "@n8n/n8n-nodes-langchain.mcpClient",
+      "typeVersion": 1.1,
+      "position": [
+        440,
+        0
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "",
+          "name": "Evaboot MCP (Bearer)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 30
+      },
+      "id": "54d16aad-374b-44b3-bb67-78f4a75ce22a",
+      "name": "Wait 30 s",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        660,
+        0
+      ],
+      "webhookId": "c80f7ec9-48e5-4f0d-a104-a1731320b530"
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://mcp.evaboot.com/mcp",
+        "authentication": "bearerAuth",
+        "tool": {
+          "__rl": true,
+          "mode": "list",
+          "value": "get_export",
+          "cachedResultName": "get_export"
+        },
+        "inputMode": "json",
+        "jsonInput": "={{ JSON.stringify({ extraction_id: $('Start the export').first().json.structuredContent.result.extraction_id, limit: 0 }) }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "ceba2926-ee0a-4ed6-9f4c-d98ea8173706",
+      "name": "Export status",
+      "type": "@n8n/n8n-nodes-langchain.mcpClient",
+      "typeVersion": 1.1,
+      "position": [
+        880,
+        0
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "",
+          "name": "Evaboot MCP (Bearer)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\n// Stop on a failed export, or after 20 minutes, instead of waiting forever.\nconst s = $json.structuredContent?.result?.status;\nif (['FAILED', 'ERROR', 'CANCELLED', 'CANCELED'].includes(s)) throw new Error(`The export ended with status ${s}.`);\nif ($runIndex >= 40) throw new Error('The export is still not finished after 20 minutes.');\nreturn $input.all();\n"
+      },
+      "id": "ce1fb4d4-2fae-4f8c-96a7-25f628aecb08",
+      "name": "Still running?",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "7236cfc0-1970-40d0-8420-bedf97241e83",
+              "leftValue": "={{ $json.structuredContent.result.status }}",
+              "rightValue": "EXECUTED",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "e2d1d1f1-774c-4a90-ba89-006130a2de0b",
+      "name": "Finished?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1100,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://mcp.evaboot.com/mcp",
+        "authentication": "bearerAuth",
+        "tool": {
+          "__rl": true,
+          "mode": "list",
+          "value": "get_export",
+          "cachedResultName": "get_export"
+        },
+        "inputMode": "json",
+        "jsonInput": "={{ JSON.stringify({ extraction_id: $('Start the export').first().json.structuredContent.result.extraction_id }) }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "4b9c2640-3106-4a81-9004-be4f9867a70c",
+      "name": "Get the leads",
+      "type": "@n8n/n8n-nodes-langchain.mcpClient",
+      "typeVersion": 1.1,
+      "position": [
+        1320,
+        -120
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "",
+          "name": "Evaboot MCP (Bearer)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\n// Rules 1 and 2 of the skill, in code: Evaboot's own filter check, then placeholder companies.\n// Everything else (ICP hard rules, fit score) is Claude's job, with the fields it needs.\nconst num = v => { const n = parseFloat(String(v ?? '').replace(/,/g, '')); return isNaN(n) ? null : n; };\nconst words = s => String(s || '').split(/\\s+/).join(' ').trim();\nconst all = $json.structuredContent?.result?.prospects || [];\nconst PLACEHOLDER = /\\b(stealth|freelance|self-employed|undisclosed|confidential)\\b/i;\nreturn all.map((p, i) => {\n  const base = { id: String(i + 1), name: `${p['First Name'] || ''} ${p['Last Name'] || ''}`.trim(),\n    title: String(p['Current Job'] || '').trim(), company: p['Company Name'] || '',\n    email: p['Email'] || '', email_status: p['Email Status'] || '', linkedin_url: p['Linkedin URL Public'] || '' };\n  let drop = '';\n  if (String(p['Matches Filters'] || '').toUpperCase() === 'NO') drop = `Matches Filters NO: ${p['No Match Reasons'] || 'no reason given'}`;\n  else if (p['Company Type'] === 'Self-Employed' || PLACEHOLDER.test(base.company)) drop = `placeholder company: ${base.company}`;\n  if (drop) return { json: { ...base, drop } };\n  const y = num(p['Years in Position']) || 0, m = num(p['Months in Position']) || 0;\n  return { json: { ...base, drop: '',\n    time_in_role: [[y, 'year'], [m, 'month']].filter(([n]) => n).map(([n, u]) => `${n} ${u}${n > 1 ? 's' : ''}`).join(' ') || 'under a month',\n    company_headcount: num(p['Company Employee Exact Count']), company_hq: p['Company Headquarters (Full Address)'] || '',\n    company_industry: p['Company Industry'] || '', company_description: words(p['Company Description']).slice(0, 400),\n    company_specialities: words(p['Company Specialities']).slice(0, 200),\n    sales_team: num(p['Sales Team Size']), bd_team: num(p['Business Development Size']),\n    company_growth_1y_pct: num(p['Company Employee Growth 1 Year (%)']),\n    recent_posts_30d: num(p['Profile Recent Posts (30 Days)']), headline: words(p['Profile Headline']) } };\n});\n"
+      },
+      "id": "0156a165-2153-4329-9213-9c740d5ab9f5",
+      "name": "Check each lead",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1540,
+        -120
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a24d40f1-ee5e-468f-a6ff-56dbf39a11cc",
+              "leftValue": "={{ $json.drop }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "d3c11467-f4d5-44c2-8929-d4c8d5166ebc",
+      "name": "Leads to qualify",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        1760,
+        -120
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "leads",
+        "options": {}
+      },
+      "id": "45ad6548-9045-4bf1-a5f8-272c194c4c72",
+      "name": "All leads",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1980,
+        -120
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json.leads.filter(l => l.id)) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are an SDR. For each lead in the JSON, apply the ICP below: first its hard rules (fail one = drop, with the field and its value), then the fit score from 1 to 3 with a one-line reason that quotes the fields you used.\nFor every lead scored 2 or 3, write a LinkedIn connection note under 200 characters built on one fact from the lead (no pitch, no link), and a one-sentence email opening line built on a different fact. Follow the offer and tone below.\nUse only facts in the JSON and the offer: never invent a customer, a number, a post or a mutual connection.\nReturn {id, drop} for a dropped lead, or {id, fit, reason, connection_note, opening_line}.\n\nICP:\n{{ $('Your settings').first().json.icp }}\n\nOffer and tone:\n{{ $('Your settings').first().json.offer }}",
+          "maxIterations": 3
+        }
+      },
+      "id": "3ca84bac-3196-4f6d-85fb-5ebf8ff0980b",
+      "name": "Qualify and write",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        2200,
+        -120
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-5-5",
+          "cachedResultName": "claude-sonnet-5-5"
+        },
+        "options": {
+          "maxTokensToSample": 12000
+        }
+      },
+      "id": "8f56cac3-d8b7-48e8-a944-9fe7f219b1f2",
+      "name": "Claude",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        2160,
+        100
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": "",
+          "name": "Anthropic"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"required\": [\n    \"leads\"\n  ],\n  \"properties\": {\n    \"leads\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"required\": [\n          \"id\"\n        ],\n        \"properties\": {\n          \"id\": {\n            \"type\": \"string\"\n          },\n          \"drop\": {\n            \"type\": \"string\"\n          },\n          \"fit\": {\n            \"type\": \"integer\"\n          },\n          \"reason\": {\n            \"type\": \"string\"\n          },\n          \"connection_note\": {\n            \"type\": \"string\"\n          },\n          \"opening_line\": {\n            \"type\": \"string\"\n          }\n        }\n      }\n    }\n  }\n}"
+      },
+      "id": "b8b8a668-29f3-4064-a7e9-93a2c253a21e",
+      "name": "Qualified leads",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        2320,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\n// The prospect sheet: kept leads best fit first, then the dropped ones with their reason.\nconst leads = $('Check each lead').all().map(i => i.json);\nconst out = Object.fromEntries(($json.output?.leads || []).map(l => [l.id, l]));\nconst rows = leads.map(l => {\n  const c = out[l.id] || {};\n  const drop = l.drop || c.drop || (c.fit >= 2 ? '' : `fit ${c.fit ?? '?'}: ${c.reason || 'not scored'}`);\n  const channel = ['safe'].includes(l.email_status) ? 'email + LinkedIn' : l.email_status === 'riskier' ? 'LinkedIn first' : 'LinkedIn only';\n  return { status: drop ? 'dropped' : 'kept', fit: drop ? '' : c.fit, name: l.name, title: l.title, company: l.company,\n    size: l.company_headcount ?? '', time_in_role: l.time_in_role || '', reason: drop || c.reason || '',\n    channel: drop ? '' : channel, email: drop || channel === 'LinkedIn only' ? '' : l.email,\n    connection_note: drop ? '' : c.connection_note || '', opening_line: drop || channel === 'LinkedIn only' ? '' : c.opening_line || '',\n    linkedin_url: l.linkedin_url };\n});\nrows.sort((a, b) => (a.status === b.status ? (b.fit || 0) - (a.fit || 0) : a.status === 'kept' ? -1 : 1));\nreturn rows.map(json => ({ json }));\n"
+      },
+      "id": "cec27a29-4054-4e03-9f09-61c1ef8d484d",
+      "name": "Prospect sheet",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2420,
+        -120
+      ]
+    },
+    {
+      "parameters": {
+        "options": {
+          "fileName": "={{ 'prospects-' + $now.toFormat('yyyy-MM-dd') + '.csv' }}"
+        }
+      },
+      "id": "6502bab5-15b5-4830-b3eb-778cb5aa142d",
+      "name": "CSV file",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        2640,
+        -120
+      ]
+    }
+  ],
+  "connections": {
+    "Prospecting session": {
+      "main": [
+        [
+          {
+            "node": "Your settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Your settings": {
+      "main": [
+        [
+          {
+            "node": "Start the export",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start the export": {
+      "main": [
+        [
+          {
+            "node": "Wait 30 s",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 30 s": {
+      "main": [
+        [
+          {
+            "node": "Export status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Export status": {
+      "main": [
+        [
+          {
+            "node": "Finished?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get the leads": {
+      "main": [
+        [
+          {
+            "node": "Check each lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check each lead": {
+      "main": [
+        [
+          {
+            "node": "Leads to qualify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leads to qualify": {
+      "main": [
+        [
+          {
+            "node": "All leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "All leads": {
+      "main": [
+        [
+          {
+            "node": "Qualify and write",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qualify and write": {
+      "main": [
+        [
+          {
+            "node": "Prospect sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prospect sheet": {
+      "main": [
+        [
+          {
+            "node": "CSV file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Finished?": {
+      "main": [
+        [
+          {
+            "node": "Get the leads",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Still running?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Still running?": {
+      "main": [
+        [
+          {
+            "node": "Wait 30 s",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Qualify and write",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qualified leads": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Qualify and write",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}
