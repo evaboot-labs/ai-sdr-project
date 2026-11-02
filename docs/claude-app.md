@@ -9,7 +9,7 @@ The AI SDR runs in a Claude Project on claude.ai or the Claude desktop app. No t
 ## 2. Add the skill
 
 1. Download this repo (*Code > Download ZIP*) and unzip it.
-2. Zip the `skills/claude-ai-sdr` folder on its own (`claude-ai-sdr.zip`, with `SKILL.md` inside the `claude-ai-sdr` folder).
+2. Zip the `skills/ai-sdr-project` folder on its own (`ai-sdr-project.zip`, with `SKILL.md` inside the `ai-sdr-project` folder).
 3. *Customize > Skills > Upload a skill*, pick the zip, and turn the skill on.
 
 ## 3. Create the project

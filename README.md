@@ -16,7 +16,7 @@ Turn Claude into your SDR for one prospecting session. Describe who you want in 
 Paste this into Claude Code, Codex or Cursor:
 
 ```text
-Clone https://github.com/evaboot-labs/claude-ai-sdr, read AGENTS.md and follow the skill. Find 10 Heads of Sales in the UK who changed jobs in the past 90 days.
+Clone https://github.com/evaboot-labs/ai-sdr-project, read AGENTS.md and follow the skill. Find 10 Heads of Sales in the UK who changed jobs in the past 90 days.
 ```
 
 Using the Claude app instead? Set it up as a Claude Project with [docs/claude-app.md](docs/claude-app.md).
@@ -27,14 +27,14 @@ Using the Claude app instead? Set it up as a Claude Project with [docs/claude-ap
 Claude Code:
 
 ```text
-/plugin marketplace add evaboot-labs/claude-ai-sdr
-/plugin install claude-ai-sdr@evaboot-labs-claude-ai-sdr
+/plugin marketplace add evaboot-labs/ai-sdr-project
+/plugin install ai-sdr-project@evaboot-labs-ai-sdr-project
 ```
 
 Codex, Cursor and other agents:
 
 ```bash
-npx skills add evaboot-labs/claude-ai-sdr
+npx skills add evaboot-labs/ai-sdr-project
 ```
 
 </details>
@@ -55,7 +55,7 @@ npx skills add evaboot-labs/claude-ai-sdr
 
 ## What you need
 
-- An [Evaboot account](https://dash.evaboot.com/accounts/signup/?last_click_origin=claude-ai-sdr-repo) and a Sales Navigator seat.
+- An [Evaboot account](https://dash.evaboot.com/accounts/signup/?last_click_origin=ai-sdr-project-repo) and a Sales Navigator seat.
 - Claude (web, desktop or Claude Code) with the Evaboot connector, or Codex or Cursor with the MCP server.
 - Cost: 1 Evaboot credit per exported lead, email included. Building the search is free.
 

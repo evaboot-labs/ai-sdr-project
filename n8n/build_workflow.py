@@ -1,4 +1,4 @@
-"""Builds n8n/claude-ai-sdr.json. Run: python3 n8n/build_workflow.py
+"""Builds n8n/ai-sdr-project.json. Run: python3 n8n/build_workflow.py
 
 One prospecting session as an n8n form: paste a Sales Navigator search URL and a lead count, Evaboot exports the
 leads with verified emails, a check drops the wrong ones, Claude scores each remaining lead against your ICP and
@@ -179,6 +179,6 @@ link("Qualified leads", "Qualify and write", "ai_outputParser")
 
 workflow = {"name": "AI SDR session (Evaboot + Claude)", "nodes": nodes,
             "connections": connections, "settings": {"executionOrder": "v1"}, "pinData": {}}
-out = Path(__file__).with_name("claude-ai-sdr.json")
+out = Path(__file__).with_name("ai-sdr-project.json")
 out.write_text(json.dumps(workflow, indent=2, ensure_ascii=False) + "\n")
 print(out, len(nodes), "nodes")

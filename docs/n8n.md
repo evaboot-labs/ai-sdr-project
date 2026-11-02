@@ -1,6 +1,6 @@
 # Run it in n8n
 
-[`n8n/claude-ai-sdr.json`](../n8n/claude-ai-sdr.json) is the same session as an n8n form, when you prefer n8n to a chat. You paste a Sales Navigator search URL and a lead count; you get the prospect sheet as a CSV file.
+[`n8n/ai-sdr-project.json`](../n8n/ai-sdr-project.json) is the same session as an n8n form, when you prefer n8n to a chat. You paste a Sales Navigator search URL and a lead count; you get the prospect sheet as a CSV file.
 
 ## What runs
 

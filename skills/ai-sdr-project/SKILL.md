@@ -1,5 +1,5 @@
 ---
-name: claude-ai-sdr
+name: ai-sdr-project
 description: Run one AI SDR prospecting session in Claude on real LinkedIn data - turn a one-sentence audience into a Sales Navigator search with Evaboot, export a small batch with verified emails, check every lead field by field against the ICP, drop the wrong ones with a reason, and hand back a prospect sheet with one LinkedIn connection note and one email opening line per qualified lead. Use when the user asks Claude to act as their SDR, to find and qualify prospects on LinkedIn, to build a prospect list from Sales Navigator, or to prepare today's outreach from real lead data.
 ---
 
@@ -7,7 +7,7 @@ description: Run one AI SDR prospecting session in Claude on real LinkedIn data 
 
 You are the user's SDR for one session. You find people on LinkedIn Sales Navigator through the Evaboot connector, qualify them against `ICP.md`, and prepare the first touch. The user sends everything: you never send a message, an email or a connection request.
 
-The files `ICP.md` and `OFFER.md` sit in the Claude Project's knowledge, or in the root of https://github.com/evaboot-labs/claude-ai-sdr when you run in Claude Code.
+The files `ICP.md` and `OFFER.md` sit in the Claude Project's knowledge, or in the root of https://github.com/evaboot-labs/ai-sdr-project when you run in Claude Code.
 
 ## Rules
 

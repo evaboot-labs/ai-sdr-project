@@ -4,7 +4,7 @@ The AI SDR needs one MCP server: Evaboot.
 
 ## 1. Account
 
-An [Evaboot account](https://dash.evaboot.com/accounts/signup/?last_click_origin=claude-ai-sdr-repo) with credits, and a Sales Navigator seat connected to it.
+An [Evaboot account](https://dash.evaboot.com/accounts/signup/?last_click_origin=ai-sdr-project-repo) with credits, and a Sales Navigator seat connected to it.
 
 ## 2. Connect the MCP server
 
@@ -13,8 +13,8 @@ An [Evaboot account](https://dash.evaboot.com/accounts/signup/?last_click_origin
 **Claude Code:** sign in with the same Claude account and the connector is there. Or clone the repo, write `EVABOOT_API_KEY` ([dash.evaboot.com/dash/api/](https://dash.evaboot.com/dash/api/)) into `.env`, and start Claude Code from the repo folder with the key loaded: it reads `.mcp.json`.
 
 ```bash
-git clone https://github.com/evaboot-labs/claude-ai-sdr
-cd claude-ai-sdr
+git clone https://github.com/evaboot-labs/ai-sdr-project
+cd ai-sdr-project
 cp .env.example .env
 # write your key into .env, then start Claude Code with it:
 set -a; source .env; set +a
