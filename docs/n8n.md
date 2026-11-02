@@ -6,7 +6,7 @@
 
 1. **Prospecting session** (Form): the Sales Navigator search URL and how many leads (up to 100).
 2. **Your settings** (Set): your `ICP.md` and `OFFER.md`, pasted as text.
-3. **Start the export**, **Wait 30 s**, **Export status**, **Finished?** (Evaboot MCP): exports the leads and waits until the export is done.
+3. **Start the export**, **Wait 30 s**, **Export status**, **Finished?**, **Still running?** (Evaboot MCP + Code): exports the leads and waits until the export is done. It stops with an error if the export fails or takes over 20 minutes.
 4. **Get the leads** and **Check each lead** (Evaboot MCP + Code): drops leads that fail Evaboot's filter check or work at a placeholder company.
 5. **Qualify and write** (AI Agent with Claude): applies your ICP, scores each lead from 1 to 3 with a reason, and writes the connection note and the opening line.
 6. **Prospect sheet** and **CSV file**: kept leads best fit first, then the dropped ones with their reason.

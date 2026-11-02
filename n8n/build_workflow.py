@@ -58,7 +58,7 @@ return all.map((p, i) => {
     title: String(p['Current Job'] || '').trim(), company: p['Company Name'] || '',
     email: p['Email'] || '', email_status: p['Email Status'] || '', linkedin_url: p['Linkedin URL Public'] || '' };
   let drop = '';
-  if (p['Matches Filters'] !== 'YES') drop = `Matches Filters NO: ${p['No Match Reasons'] || 'no reason given'}`;
+  if (String(p['Matches Filters'] || '').toUpperCase() === 'NO') drop = `Matches Filters NO: ${p['No Match Reasons'] || 'no reason given'}`;
   else if (p['Company Type'] === 'Self-Employed' || PLACEHOLDER.test(base.company)) drop = `placeholder company: ${base.company}`;
   if (drop) return { json: { ...base, drop } };
   const y = num(p['Years in Position']) || 0, m = num(p['Months in Position']) || 0;
@@ -121,6 +121,13 @@ node("Wait 30 s", "n8n-nodes-base.wait", 1.1, {"amount": 30}, [660, 0], webhookI
 mcp_call("Export status", "get_export",
          "={{ JSON.stringify({ extraction_id: $('Start the export').first().json.structuredContent.result.extraction_id, limit: 0 }) }}",
          [880, 0])
+code("Still running?", r"""
+// Stop on a failed export, or after 20 minutes, instead of waiting forever.
+const s = $json.structuredContent?.result?.status;
+if (['FAILED', 'ERROR', 'CANCELLED', 'CANCELED'].includes(s)) throw new Error(`The export ended with status ${s}.`);
+if ($runIndex >= 40) throw new Error('The export is still not finished after 20 minutes.');
+return $input.all();
+""", [1100, 160])
 node("Finished?", "n8n-nodes-base.if", 2.2, {"conditions": {
     "options": {"caseSensitive": True, "typeValidation": "loose", "version": 2},
     "conditions": [{"id": str(uuid.uuid4()), "leftValue": "={{ $json.structuredContent.result.status }}",
@@ -165,7 +172,8 @@ for a, b in [("Prospecting session", "Your settings"), ("Your settings", "Start 
              ("Qualify and write", "Prospect sheet"), ("Prospect sheet", "CSV file")]:
     link(a, b)
 link("Finished?", "Get the leads", out=0)
-link("Finished?", "Wait 30 s", out=1)
+link("Finished?", "Still running?", out=1)
+link("Still running?", "Wait 30 s")
 link("Claude", "Qualify and write", "ai_languageModel")
 link("Qualified leads", "Qualify and write", "ai_outputParser")
 

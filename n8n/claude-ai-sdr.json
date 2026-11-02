@@ -20,7 +20,7 @@
         },
         "options": {}
       },
-      "id": "b9482886-c4e7-45ef-a51f-4d2fe24727b9",
+      "id": "6cd6ef34-1b15-4b9b-afea-1eec86ca3000",
       "name": "Prospecting session",
       "type": "n8n-nodes-base.formTrigger",
       "typeVersion": 2.2,
@@ -28,20 +28,20 @@
         0,
         0
       ],
-      "webhookId": "4eb3d4d7-2fc8-48f0-a57e-1a10099cc8d3"
+      "webhookId": "83980e42-28be-4ec8-a90d-8794c94541de"
     },
     {
       "parameters": {
         "assignments": {
           "assignments": [
             {
-              "id": "83a69f4f-9c76-4fe3-a169-1c2dc9dc2c86",
+              "id": "6df86df7-0636-44e5-984c-40ba3db9fdc8",
               "name": "icp",
               "type": "string",
               "value": "PASTE YOUR ICP.md"
             },
             {
-              "id": "acbf4950-6b99-4490-a2dd-cbe52a19a6ea",
+              "id": "61e84b45-e54b-4d8d-8cb3-679f1866d5e6",
               "name": "offer",
               "type": "string",
               "value": "PASTE YOUR OFFER.md"
@@ -50,7 +50,7 @@
         },
         "options": {}
       },
-      "id": "b1bd619c-89bc-43be-842e-984bf51aea56",
+      "id": "59c62204-b2e4-4015-ab3e-27de7269b04e",
       "name": "Your settings",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
@@ -75,7 +75,7 @@
           "timeout": 120000
         }
       },
-      "id": "df9d81fe-cb3b-4f48-a988-9d0f49105a4a",
+      "id": "12525b67-adc4-4db1-ac7c-133168f3fea1",
       "name": "Start the export",
       "type": "@n8n/n8n-nodes-langchain.mcpClient",
       "typeVersion": 1.1,
@@ -94,7 +94,7 @@
       "parameters": {
         "amount": 30
       },
-      "id": "3b63608f-3d0f-4fd4-befd-6559a161a3bc",
+      "id": "df336e10-94be-4954-969e-f477896fd5d2",
       "name": "Wait 30 s",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
@@ -102,7 +102,7 @@
         660,
         0
       ],
-      "webhookId": "a629fd38-d2da-4400-9f47-45d819533b99"
+      "webhookId": "471d51ea-e4ac-4e42-94fd-6ac22583bff2"
     },
     {
       "parameters": {
@@ -120,7 +120,7 @@
           "timeout": 120000
         }
       },
-      "id": "a6ce807b-4e14-4631-a711-c3de42895687",
+      "id": "4916276b-839b-4305-a2fa-ab653ebf7da3",
       "name": "Export status",
       "type": "@n8n/n8n-nodes-langchain.mcpClient",
       "typeVersion": 1.1,
@@ -137,6 +137,19 @@
     },
     {
       "parameters": {
+        "jsCode": "\n// Stop on a failed export, or after 20 minutes, instead of waiting forever.\nconst s = $json.structuredContent?.result?.status;\nif (['FAILED', 'ERROR', 'CANCELLED', 'CANCELED'].includes(s)) throw new Error(`The export ended with status ${s}.`);\nif ($runIndex >= 40) throw new Error('The export is still not finished after 20 minutes.');\nreturn $input.all();\n"
+      },
+      "id": "5598cb0e-2913-4ffe-81a5-5bc7a92cb77f",
+      "name": "Still running?",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        160
+      ]
+    },
+    {
+      "parameters": {
         "conditions": {
           "options": {
             "caseSensitive": true,
@@ -145,7 +158,7 @@
           },
           "conditions": [
             {
-              "id": "e3dc9c63-bd3f-45c5-a9fc-88763447e4c5",
+              "id": "990fe73d-d143-4f17-8c79-c0ee30210b34",
               "leftValue": "={{ $json.structuredContent.result.status }}",
               "rightValue": "EXECUTED",
               "operator": {
@@ -158,7 +171,7 @@
         },
         "options": {}
       },
-      "id": "311e284e-517b-4deb-9bc7-79b611d2da23",
+      "id": "ac99e36c-5420-4459-8a10-c72e6248a3d5",
       "name": "Finished?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -183,7 +196,7 @@
           "timeout": 120000
         }
       },
-      "id": "2d18f4ff-9868-4011-9c83-081b07f88aa3",
+      "id": "db8264a7-651c-4b90-85d8-64814410c763",
       "name": "Get the leads",
       "type": "@n8n/n8n-nodes-langchain.mcpClient",
       "typeVersion": 1.1,
@@ -200,9 +213,9 @@
     },
     {
       "parameters": {
-        "jsCode": "\n// Rules 1 and 2 of the skill, in code: Evaboot's own filter check, then placeholder companies.\n// Everything else (ICP hard rules, fit score) is Claude's job, with the fields it needs.\nconst num = v => { const n = parseFloat(String(v ?? '').replace(/,/g, '')); return isNaN(n) ? null : n; };\nconst words = s => String(s || '').split(/\\s+/).join(' ').trim();\nconst all = $json.structuredContent?.result?.prospects || [];\nconst PLACEHOLDER = /\\b(stealth|freelance|self-employed|undisclosed|confidential)\\b/i;\nreturn all.map((p, i) => {\n  const base = { id: String(i + 1), name: `${p['First Name'] || ''} ${p['Last Name'] || ''}`.trim(),\n    title: String(p['Current Job'] || '').trim(), company: p['Company Name'] || '',\n    email: p['Email'] || '', email_status: p['Email Status'] || '', linkedin_url: p['Linkedin URL Public'] || '' };\n  let drop = '';\n  if (p['Matches Filters'] !== 'YES') drop = `Matches Filters NO: ${p['No Match Reasons'] || 'no reason given'}`;\n  else if (p['Company Type'] === 'Self-Employed' || PLACEHOLDER.test(base.company)) drop = `placeholder company: ${base.company}`;\n  if (drop) return { json: { ...base, drop } };\n  const y = num(p['Years in Position']) || 0, m = num(p['Months in Position']) || 0;\n  return { json: { ...base, drop: '',\n    time_in_role: [[y, 'year'], [m, 'month']].filter(([n]) => n).map(([n, u]) => `${n} ${u}${n > 1 ? 's' : ''}`).join(' ') || 'under a month',\n    company_headcount: num(p['Company Employee Exact Count']), company_hq: p['Company Headquarters (Full Address)'] || '',\n    company_industry: p['Company Industry'] || '', company_description: words(p['Company Description']).slice(0, 400),\n    company_specialities: words(p['Company Specialities']).slice(0, 200),\n    sales_team: num(p['Sales Team Size']), bd_team: num(p['Business Development Size']),\n    company_growth_1y_pct: num(p['Company Employee Growth 1 Year (%)']),\n    recent_posts_30d: num(p['Profile Recent Posts (30 Days)']), headline: words(p['Profile Headline']) } };\n});\n"
+        "jsCode": "\n// Rules 1 and 2 of the skill, in code: Evaboot's own filter check, then placeholder companies.\n// Everything else (ICP hard rules, fit score) is Claude's job, with the fields it needs.\nconst num = v => { const n = parseFloat(String(v ?? '').replace(/,/g, '')); return isNaN(n) ? null : n; };\nconst words = s => String(s || '').split(/\\s+/).join(' ').trim();\nconst all = $json.structuredContent?.result?.prospects || [];\nconst PLACEHOLDER = /\\b(stealth|freelance|self-employed|undisclosed|confidential)\\b/i;\nreturn all.map((p, i) => {\n  const base = { id: String(i + 1), name: `${p['First Name'] || ''} ${p['Last Name'] || ''}`.trim(),\n    title: String(p['Current Job'] || '').trim(), company: p['Company Name'] || '',\n    email: p['Email'] || '', email_status: p['Email Status'] || '', linkedin_url: p['Linkedin URL Public'] || '' };\n  let drop = '';\n  if (String(p['Matches Filters'] || '').toUpperCase() === 'NO') drop = `Matches Filters NO: ${p['No Match Reasons'] || 'no reason given'}`;\n  else if (p['Company Type'] === 'Self-Employed' || PLACEHOLDER.test(base.company)) drop = `placeholder company: ${base.company}`;\n  if (drop) return { json: { ...base, drop } };\n  const y = num(p['Years in Position']) || 0, m = num(p['Months in Position']) || 0;\n  return { json: { ...base, drop: '',\n    time_in_role: [[y, 'year'], [m, 'month']].filter(([n]) => n).map(([n, u]) => `${n} ${u}${n > 1 ? 's' : ''}`).join(' ') || 'under a month',\n    company_headcount: num(p['Company Employee Exact Count']), company_hq: p['Company Headquarters (Full Address)'] || '',\n    company_industry: p['Company Industry'] || '', company_description: words(p['Company Description']).slice(0, 400),\n    company_specialities: words(p['Company Specialities']).slice(0, 200),\n    sales_team: num(p['Sales Team Size']), bd_team: num(p['Business Development Size']),\n    company_growth_1y_pct: num(p['Company Employee Growth 1 Year (%)']),\n    recent_posts_30d: num(p['Profile Recent Posts (30 Days)']), headline: words(p['Profile Headline']) } };\n});\n"
       },
-      "id": "95a686b0-5cd8-41b6-bf9c-762a410ae260",
+      "id": "751efd32-c71b-4a84-9441-6f414214e2bc",
       "name": "Check each lead",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -221,7 +234,7 @@
           },
           "conditions": [
             {
-              "id": "9bfd6ec3-adbc-4de1-939d-98854c67f361",
+              "id": "bb87b6a6-388e-4c6d-a3aa-763f89e3c030",
               "leftValue": "={{ $json.drop }}",
               "rightValue": "",
               "operator": {
@@ -235,7 +248,7 @@
         },
         "options": {}
       },
-      "id": "46d35306-beac-4a76-ab73-6aee1b47ae43",
+      "id": "c3836900-31e2-49e2-bf16-cbadaa5021de",
       "name": "Leads to qualify",
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.2,
@@ -251,7 +264,7 @@
         "destinationFieldName": "leads",
         "options": {}
       },
-      "id": "0c328bea-f42c-4aeb-a615-ec7ffd168912",
+      "id": "71e1853b-db00-4df5-8413-ceaf6705f0db",
       "name": "All leads",
       "type": "n8n-nodes-base.aggregate",
       "typeVersion": 1,
@@ -270,7 +283,7 @@
           "maxIterations": 3
         }
       },
-      "id": "99e8a718-485d-4fac-bae4-b4be122aa422",
+      "id": "6827c2bb-685b-4184-be09-12dd99d0c79f",
       "name": "Qualify and write",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
@@ -294,7 +307,7 @@
           "maxTokensToSample": 12000
         }
       },
-      "id": "237f10fa-7cc3-4a41-8930-5dce962c34d0",
+      "id": "c237d113-9688-45e7-aee0-b282c8064b85",
       "name": "Claude",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
@@ -314,7 +327,7 @@
         "schemaType": "manual",
         "inputSchema": "{\n  \"type\": \"object\",\n  \"required\": [\n    \"leads\"\n  ],\n  \"properties\": {\n    \"leads\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"required\": [\n          \"id\"\n        ],\n        \"properties\": {\n          \"id\": {\n            \"type\": \"string\"\n          },\n          \"drop\": {\n            \"type\": \"string\"\n          },\n          \"fit\": {\n            \"type\": \"integer\"\n          },\n          \"reason\": {\n            \"type\": \"string\"\n          },\n          \"connection_note\": {\n            \"type\": \"string\"\n          },\n          \"opening_line\": {\n            \"type\": \"string\"\n          }\n        }\n      }\n    }\n  }\n}"
       },
-      "id": "f82ef931-118b-47cf-8fa5-1b6c028a9938",
+      "id": "002cf702-912c-4bd0-871b-2ac82d21f3f4",
       "name": "Qualified leads",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
@@ -327,7 +340,7 @@
       "parameters": {
         "jsCode": "\n// The prospect sheet: kept leads best fit first, then the dropped ones with their reason.\nconst leads = $('Check each lead').all().map(i => i.json);\nconst out = Object.fromEntries(($json.output?.leads || []).map(l => [l.id, l]));\nconst rows = leads.map(l => {\n  const c = out[l.id] || {};\n  const drop = l.drop || c.drop || (c.fit >= 2 ? '' : `fit ${c.fit ?? '?'}: ${c.reason || 'not scored'}`);\n  const channel = ['safe'].includes(l.email_status) ? 'email + LinkedIn' : l.email_status === 'riskier' ? 'LinkedIn first' : 'LinkedIn only';\n  return { status: drop ? 'dropped' : 'kept', fit: drop ? '' : c.fit, name: l.name, title: l.title, company: l.company,\n    size: l.company_headcount ?? '', time_in_role: l.time_in_role || '', reason: drop || c.reason || '',\n    channel: drop ? '' : channel, email: drop || channel === 'LinkedIn only' ? '' : l.email,\n    connection_note: drop ? '' : c.connection_note || '', opening_line: drop || channel === 'LinkedIn only' ? '' : c.opening_line || '',\n    linkedin_url: l.linkedin_url };\n});\nrows.sort((a, b) => (a.status === b.status ? (b.fit || 0) - (a.fit || 0) : a.status === 'kept' ? -1 : 1));\nreturn rows.map(json => ({ json }));\n"
       },
-      "id": "72c1f21c-abd3-4a33-8d97-abc051c0ebf1",
+      "id": "810a5798-27b7-4df1-a806-ee13178fdb40",
       "name": "Prospect sheet",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -342,7 +355,7 @@
           "fileName": "={{ 'prospects-' + $now.toFormat('yyyy-MM-dd') + '.csv' }}"
         }
       },
-      "id": "76c754ff-b332-4bb8-8e00-9ebf00a9c08c",
+      "id": "83fff160-5234-4e12-84f7-008651a813a6",
       "name": "CSV file",
       "type": "n8n-nodes-base.convertToFile",
       "typeVersion": 1.1,
@@ -483,6 +496,17 @@
             "index": 0
           }
         ],
+        [
+          {
+            "node": "Still running?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Still running?": {
+      "main": [
         [
           {
             "node": "Wait 30 s",
